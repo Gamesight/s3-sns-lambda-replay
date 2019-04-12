@@ -32,7 +32,7 @@ class LambdaWorker(Process):
 
     def run(self):
         for job in iter(self.job_queue.get, None):
-            print(f"Worker {self.id} - Job {job['id']}/{self.total_jobs}")
+            print(f"Worker {self.id} - Job {job['id']+1}/{self.total_jobs}")
             results = {
                 'id': job['id'],
                 'body': '',
@@ -50,8 +50,9 @@ class LambdaWorker(Process):
 
                     results['body'] = response['Payload'].read().decode('utf-8')
                     results['status'] = response['StatusCode']
-                    results['error'] = response['FunctionError']
+                    results['error'] = response.get('FunctionError')
                     print(f"Worker {self.id} - Response {results['status']} {results['body']}")
+                    break
 
                 except Exception as e:
                     print(f"Worker {self.id} - Exception caught {e}")
