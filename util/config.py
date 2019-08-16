@@ -71,6 +71,12 @@ Concurrency       : {self.concurrency}
         prefix = ''
         while True:
             choices = [b['Prefix'] for b in self.s3_prefix_generator(self.s3_bucket, prefix)]
+
+            # If there are no more common prefixes beneath this layer, use it as the prefix
+            if len(choices) == 0:
+                paths = [prefix]
+                break
+
             selection = questionary.checkbox(
                 "Browse to the path containing the files to be replayed. When at the proper path select the first and last item to be replayed:",
                 choices=reversed(choices)
@@ -115,7 +121,7 @@ Concurrency       : {self.concurrency}
         }
         while True:
             resp = s3.list_objects_v2(**opts)
-            contents = resp['CommonPrefixes']
+            contents = resp.get('CommonPrefixes',[])
 
             for obj in contents:
                 yield obj
