@@ -9,7 +9,7 @@ class ReplayConfig(object):
     s3_bucket = None
     s3_paths = None
     lambda_functions = None
-    batch_size = 25
+    batch_size = 10
     concurrency = 10
 
     def __init__(self):
@@ -33,7 +33,7 @@ S3 Bucket: {self.s3_bucket}
 S3 Paths :
     - {self.s3_paths[0]}
     - ({len(self.s3_paths)} total)
-    - {self.s3_paths[-1]}
+    - {self.s3_paths[len(self.s3_paths) - 1]}
 
 #################
 Lambda Function(s):
@@ -65,7 +65,7 @@ Concurrency       : {self.concurrency}
 
     def get_s3_paths(self, args):
         if args.paths:
-            return args.paths
+            return args.paths.split(",")
 
         paths = None
         prefix = ''

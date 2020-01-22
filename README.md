@@ -23,3 +23,14 @@ Run the help command for a full list of available command line options
 ```
 python s3-lambda-replay.py --help
 ```
+## Example Command Line Execution
+Note that we must escape the `$`
+This example is also included in the file `run_replay.sh`
+```
+python3 s3-lambda-replay.py \
+-b gamesight-collection-pipeline-us-west-2-prod \
+-p twitch/all/chatters/\$LATEST/objects/dt=2020-01-02-08-00/,twitch/all/chatters/\$LATEST/objects/dt=2020-01-02-09-00/ \
+-l gstrans-prod-twitch-all-chatters
+```
+
+Using the command line also allows us to quickly include paths that aren't along `/` separation lines. For example, we can use the path `twitch/all/chatters/\$LATEST/objects/dt=2020-01-02-1` to look at all records between 10:00 and 20:00 on 2020-01-02, or `twitch/all/chatters/\$LATEST/objects/dt=2020-01-02` to just run all of the objects from that day.
