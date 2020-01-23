@@ -9,7 +9,7 @@ class ReplayConfig(object):
     s3_bucket = None
     s3_paths = None
     lambda_functions = None
-    batch_size = 15
+    batch_size = 1_000_000
     concurrency = 5
     bypass = False
 

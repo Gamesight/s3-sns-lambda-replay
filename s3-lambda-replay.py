@@ -126,11 +126,29 @@ def pull_jobs(config):
             files.append({'s3': {
                 'bucket': {'name': config.s3_bucket},
                 'object': {'key': obj['Key']},
+                'size': obj['Size']
             }})
+    #Sort the list by size ascending
+    files.sort(key=lambda x: x['s3']['size'], reverse=False)
 
     jobs = []
     while len(files) > 0:
-        batch = files[0:config.batch_size]
+        #Greedily add files to batches, taking the largest files
+        #That fits in the bucket
+        batch = [files[0]] #always add the biggest object
+        del files[0] #remove the first object
+        batch_total = batch[0]['s3']['size'] #set the batch size
+
+        for i,f in enumerate(files):
+            # if the next element will exceed the cap delete previous elements and break out
+            if f['s3']['size'] + batch_total > config.batch_size:
+                del files[0:i]
+                break
+            # otherwise add the element to the batch and increment the size
+            else:
+                batch_total += f['s3']['size']
+                batch.append(f)
+
         data = generate_sns_lambda_payload(batch)
 
         for func in config.lambda_functions:
@@ -142,7 +160,7 @@ def pull_jobs(config):
             })
 
         # Move on to the next batch
-        files = files[config.batch_size:]
+        #files = files[config.batch_size:]
 
     return jobs
 
