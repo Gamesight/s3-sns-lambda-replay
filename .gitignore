@@ -105,3 +105,5 @@ venv.bak/
 
 jobs.json
 jobs-failed.json
+
+errors.txt

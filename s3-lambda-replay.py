@@ -32,6 +32,7 @@ class LambdaWorker(Process):
 
     def run(self):
         for job in iter(self.job_queue.get, None):
+            #time.sleep(5)
             print(f"Worker {self.id} - Job {job['id']+1}/{self.total_jobs}")
             results = {
                 'id': job['id'],
@@ -57,6 +58,11 @@ class LambdaWorker(Process):
                 except Exception as e:
                     print(f"Worker {self.id} - Exception caught {e}")
                     results['body'] = str(e)
+                    if ( str(e).split(":")[0] == "Read timeout on endpoint URL"):
+                        print(f"Read timeout on {job}")
+                        #We need some additional handling here.
+                        results['error'] = 'Read timeout'
+                        break
                     if results['retries'] >= 5:
                         results['error'] = 'TooManyRetries'
                         break
@@ -149,8 +155,9 @@ def log_state(jobs, failed_jobs):
 if __name__ == "__main__":
     config = ReplayConfig()
     print(config)
-    if not questionary.confirm("Is this configuration correct?", default=False).ask():
-        exit()
+    if not config.bypass:
+        if not questionary.confirm("Is this configuration correct?", default=False).ask():
+            exit()
 
     jobs = pull_jobs(config)
     failed_jobs = []

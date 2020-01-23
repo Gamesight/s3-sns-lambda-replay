@@ -9,19 +9,24 @@ class ReplayConfig(object):
     s3_bucket = None
     s3_paths = None
     lambda_functions = None
-    batch_size = 10
-    concurrency = 10
+    batch_size = 15
+    concurrency = 5
+    bypass = False
 
     def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('-b', '--bucket', help="S3 Bucket to use", default=None)
         parser.add_argument('-p', '--paths', help="Paths to replay, comma separated", default=None)
         parser.add_argument('-l', '--lambdas', help="Lambda arns to call", default=None)
+        parser.add_argument('-y', '--yes', action="store_const", help="Skip the verification",
+            dest="bypass", const=True, default=False)
         args = parser.parse_args()
 
         self.s3_bucket = self.get_s3_bucket(args)
         self.s3_paths = self.get_s3_paths(args)
         self.lambda_functions = self.get_lambda_functions(args)
+        self.bypass = args.bypass
+        print(self.bypass)
 
     def __str__(self):
         lambda_str = '\n    - '.join(self.lambda_functions)
@@ -40,6 +45,7 @@ Lambda Function(s):
     - {lambda_str}
 Batch Size        : {self.batch_size}
 Concurrency       : {self.concurrency}
+Bypass            : {self.bypass}
 """
 
     def get_s3_bucket(self, args):
