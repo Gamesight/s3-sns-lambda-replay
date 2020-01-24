@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 for i in `seq 8 9`;
 do
   python3 s3-lambda-replay.py \
