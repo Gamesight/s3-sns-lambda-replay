@@ -9,8 +9,8 @@ class ReplayConfig(object):
     s3_bucket = None
     s3_paths = None
     lambda_functions = None
-    batch_size = 1_000_000
-    concurrency = 5
+    batch_size = 2_000_000
+    concurrency = 12
     bypass = False
 
     def __init__(self):

@@ -16,6 +16,7 @@ import boto3
 import json
 import questionary
 import time
+import sys
 
 from util.config import ReplayConfig
 
@@ -32,8 +33,13 @@ class LambdaWorker(Process):
 
     def run(self):
         for job in iter(self.job_queue.get, None):
-            #time.sleep(5)
-            print(f"Worker {self.id} - Job {job['id']+1}/{self.total_jobs}")
+            thisId = str(self.id)
+            if self.id < 10:
+                thisId = "0" + thisId
+            sys.stdout.write(f"\rWorker {thisId} - Job {job['id']+1}/{self.total_jobs}")
+            sys.stdout.flush()
+            if job['id'] + 1 == self.total_jobs:
+                print("\nAll jobs complete. Cleaning up...")
             results = {
                 'id': job['id'],
                 'body': '',
@@ -52,7 +58,8 @@ class LambdaWorker(Process):
                     results['body'] = response['Payload'].read().decode('utf-8')
                     results['status'] = response['StatusCode']
                     results['error'] = response.get('FunctionError')
-                    print(f"Worker {self.id} - Response {results['status']} {results['body']}")
+                    if not results['status'] == 200:
+                        print(f"Worker {self.id} - Response {results['status']} {results['body']}")
                     break
 
                 except Exception as e:
@@ -85,10 +92,13 @@ def s3_object_generator(bucket, prefix=''):
         'Bucket': bucket,
         'Prefix': prefix,
     }
+    fileSum = 0
     while True:
         resp = s3.list_objects_v2(**opts)
         contents = resp['Contents']
-
+        fileSum += len(contents)
+        sys.stdout.write(f"\rAdded {fileSum} objects to the queue.")
+        sys.stdout.flush()
         for obj in contents:
             yield obj
 
@@ -96,6 +106,7 @@ def s3_object_generator(bucket, prefix=''):
             opts['ContinuationToken'] = resp['NextContinuationToken']
         except KeyError:
             break
+    print("\nAll objects added to the queue. Building batches...")
 
 def generate_sns_lambda_payload(files):
     return {'Records': [
@@ -133,8 +144,7 @@ def pull_jobs(config):
 
     jobs = []
     while len(files) > 0:
-        #Greedily add files to batches, taking the largest files
-        #That fits in the bucket
+        #Greedily add files to batches, taking the smallest files
         batch = [files[0]] #always add the biggest object
         del files[0] #remove the first object
         batch_total = batch[0]['s3']['size'] #set the batch size
@@ -158,6 +168,11 @@ def pull_jobs(config):
                 'id': len(jobs),
                 'result': None,
             })
+
+        sys.stdout.write(f"\rCreated {len(jobs)} batches.")
+        sys.stdout.flush()
+
+    print("\nAll batches created. Starting execution...")
 
         # Move on to the next batch
         #files = files[config.batch_size:]

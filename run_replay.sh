@@ -1,7 +1,19 @@
-# Last execution 2020-01-07
+!/bin/bash
+for i in `seq 8 9`;
+do
+  python3 s3-lambda-replay.py \
+  -b gamesight-collection-pipeline-us-west-2-prod \
+  -p twitch/all/chatters/\$LATEST/objects/dt=2020-01-0$i \
+  -l gstrans-prod-twitch-all-chatters \
+  -y
+done
 
-python3 s3-lambda-replay.py \
--b gamesight-collection-pipeline-us-west-2-prod \
--p twitch/all/chatters/\$LATEST/objects/dt=2020-01-06-18-00/f4 \
--l gstrans-prod-twitch-all-chatters \
--y
+
+for i in `seq 10 24`;
+do
+  python3 s3-lambda-replay.py \
+  -b gamesight-collection-pipeline-us-west-2-prod \
+  -p twitch/all/chatters/\$LATEST/objects/dt=2020-01-$i \
+  -l gstrans-prod-twitch-all-chatters \
+  -y
+done
