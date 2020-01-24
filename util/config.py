@@ -26,7 +26,6 @@ class ReplayConfig(object):
         self.s3_paths = self.get_s3_paths(args)
         self.lambda_functions = self.get_lambda_functions(args)
         self.bypass = args.bypass
-        print(self.bypass)
 
     def __str__(self):
         lambda_str = '\n    - '.join(self.lambda_functions)
