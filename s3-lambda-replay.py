@@ -221,7 +221,7 @@ if __name__ == "__main__":
             continue
 
         jobs[result['id']]['result'] = result
-        if result['error'] != '':
+        if result['error'] != '' and result['error'] is not None:
             failed_jobs.append(jobs[result['id']])
 
         log_state(jobs, failed_jobs)
