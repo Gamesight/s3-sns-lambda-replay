@@ -200,7 +200,7 @@ if __name__ == "__main__":
     job_queue = Queue()
     result_queue = Queue()
 
-    for i in range(config.concurrency):
+    for i in range(config.concurrency * len(config.lambda_functions)):
         worker = LambdaWorker(job_queue, result_queue, i, len(jobs))
         workers.append(worker)
         worker.start()
@@ -209,12 +209,12 @@ if __name__ == "__main__":
         job_queue.put(job)
 
     # Add sentinels to the queue for each of our workers
-    for i in range(config.concurrency):
+    for i in range(config.concurrency * len(config.lambda_functions)):
         job_queue.put(None)
 
     # Collect worker results
     completed_workers = 0
-    while completed_workers < config.concurrency:
+    while completed_workers < config.concurrency * len(config.lambda_functions):
         result = result_queue.get()
         if result is None:
             completed_workers += 1
