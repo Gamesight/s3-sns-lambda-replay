@@ -33,7 +33,7 @@ class LambdaWorker(Process):
 
     def run(self):
         for job in iter(self.job_queue.get, None):
-            sys.stdout.write(f"\rWorker {self.id:02} - Job {job['id']+1}/{self.total_jobs}")
+            sys.stdout.write(f"\rWorker {self.id:02} - Job {job['id']+1}/{self.total_jobs} - {job['first_file']}")
             if not sys.stdout.isatty(): # If we aren't attached to an interactive shell then write out newlines to show progress
                 sys.stdout.write("\n")
             sys.stdout.flush()
@@ -168,6 +168,7 @@ def pull_jobs(config):
                 'data': data,
                 'id': len(jobs),
                 'result': None,
+                'first_file': batch[0]['s3']['object']['key']
             })
 
         sys.stdout.write(f"\rCreated {len(jobs)} batches.")
