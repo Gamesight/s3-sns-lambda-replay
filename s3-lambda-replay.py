@@ -33,13 +33,14 @@ class LambdaWorker(Process):
 
     def run(self):
         for job in iter(self.job_queue.get, None):
-            thisId = str(self.id)
-            if self.id < 10:
-                thisId = "0" + thisId
-            sys.stdout.write(f"\rWorker {thisId} - Job {job['id']+1}/{self.total_jobs}")
+            sys.stdout.write(f"\rWorker {self.id:02} - Job {job['id']+1}/{self.total_jobs}")
+            if not sys.stdout.isatty(): # If we aren't attached to an interactive shell then write out newlines to show progress
+                sys.stdout.write("\n")
             sys.stdout.flush()
+
             if job['id'] + 1 == self.total_jobs:
                 print("\nAll jobs complete. Cleaning up...")
+
             results = {
                 'id': job['id'],
                 'body': '',
@@ -95,7 +96,7 @@ def s3_object_generator(bucket, prefix=''):
     fileSum = 0
     while True:
         resp = s3.list_objects_v2(**opts)
-        contents = resp['Contents']
+        contents = resp.get('Contents',[])
         fileSum += len(contents)
         sys.stdout.write(f"\rAdded {fileSum} objects to the queue.")
         sys.stdout.flush()

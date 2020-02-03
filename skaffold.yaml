@@ -1,0 +1,23 @@
+# Configuration for Skaffold, a command line tool that facilitates continuous
+# development for Kubernetes applications.
+#
+# Skaffold handles building our docker containers, tagging them based on our
+# current git commit, pushing the images to our container repo, and deploying
+# the updated containers to our K8s cluster. Additionally, Skaffold calls Kustomize
+# to build the resource config files to deploy into K8s that determine how the
+# containers are deployed.
+#
+# Repo: https://github.com/GoogleContainerTools/skaffold
+apiVersion: skaffold/v1beta12
+kind: Config
+
+# Base Config
+build:
+  artifacts:
+  - image: 796380527832.dkr.ecr.us-west-2.amazonaws.com/s3-sns-lambda-replay
+    docker:
+      dockerfile: ops/Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - ops/job/*.yaml

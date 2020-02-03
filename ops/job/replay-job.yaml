@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: s3-sns-lambda-replay
+  namespace: default
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: s3-sns-lambda-replay
+      securityContext:
+        runAsUser: 61000 # container user account
+        runAsGroup: 61000 # container user account
+        fsGroup: 65534 # To be able to read Kubernetes and AWS token files, ref: https://github.com/kubernetes-sigs/external-dns/pull/1185
+
+      containers:
+      - name: replay
+        image: 796380527832.dkr.ecr.us-west-2.amazonaws.com/s3-sns-lambda-replay
+        command: ["/bin/ash", "run_replay.sh"]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 500Mi
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+
+      restartPolicy: Never
