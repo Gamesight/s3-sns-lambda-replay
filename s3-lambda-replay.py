@@ -152,7 +152,7 @@ def pull_jobs(config):
 
         for i,f in enumerate(files):
             # if the next element will exceed the cap delete previous elements and break out
-            if f['s3']['size'] + batch_total > config.batch_size:
+            if f['s3']['size'] + batch_total > config.batch_size or len(batch) > 100:
                 del files[0:i]
                 break
             # otherwise add the element to the batch and increment the size
